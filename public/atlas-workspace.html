@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Marginalia · Private Research Library</title>
+<link rel="stylesheet" href="/styles.css">
+<script defer src="/app.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Marginalia home"><span class="brandmark">M</span><span>Marginalia<small>PRIVATE RESEARCH LIBRARY</small></span></a>
+  <div class="top-actions"><span id="connection" class="pill muted">Connecting…</span><button id="logout" class="button quiet hidden">Sign out</button></div>
+</header>
+<main class="shell">
+  <section id="login-screen" class="login-wrap">
+    <div class="login-card">
+      <p class="eyebrow">YOUR RESEARCH, IN ONE PLACE</p>
+      <h1>Welcome back.</h1>
+      <p class="subtle">Sign in to access your private papers and annotations across devices.</p>
+      <form id="login-form" class="stack">
+        <label>Email address<input name="email" type="email" autocomplete="username" required placeholder="you@example.com"></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required placeholder="Your password"></label>
+        <button class="button primary" type="submit">Sign in <span aria-hidden="true">→</span></button>
+        <p id="login-error" class="error" role="alert"></p>
+      </form>
+      <p class="tiny subtle">Private account access · No public sign-up</p>
+    </div>
+  </section>
+
+  <section id="app-screen" class="hidden">
+    <div class="welcome-row"><div><p class="eyebrow">YOUR LIBRARY</p><h1>Research, organised.</h1><p class="subtle">Papers, metadata and notes synchronised to your private account.</p></div><div class="welcome-actions"><button id="upload-library-pdf-button" class="button secondary">↑ Upload PDF</button><input id="library-pdf-upload" type="file" accept="application/pdf,.pdf" hidden><button id="new-paper" class="button primary">＋ Add paper</button></div></div>
+    <div class="toolbar"><input id="search" type="search" placeholder="Search title, authors or tags…"><span id="paper-count" class="subtle small"></span></div>
+    <div id="notice" class="notice hidden" role="status"></div>
+    <div id="paper-list" class="paper-list"></div>
+    <div id="empty-state" class="empty hidden"><div class="empty-icon">↗</div><h2>Your library starts here</h2><p>Upload a PDF to create a paper entry automatically, or add its details manually.</p><div class="empty-actions"><button class="button secondary" id="empty-upload-pdf">↑ Upload a PDF</button><button class="button primary" id="empty-add">Add your first paper</button></div></div>
+  </section>
+</main>
+
+<dialog id="paper-dialog">
+  <form id="paper-form" method="dialog" class="dialog-form">
+    <div class="dialog-head"><div><p class="eyebrow">PAPER DETAILS</p><h2 id="paper-dialog-title">Add a paper</h2></div><button type="button" id="close-paper" class="icon-button" aria-label="Close">×</button></div>
+    <input type="hidden" name="id">
+    <label>Title *<input name="title" required maxlength="500" placeholder="Paper title"></label>
+    <div class="two-col"><label>Authors<input name="authors" maxlength="2000" placeholder="Author names"></label><label>Year<input name="year" inputmode="numeric" maxlength="12" placeholder="2025"></label></div>
+    <div class="two-col"><label>Journal / venue<input name="journal" maxlength="500"></label><label>DOI<input name="doi" maxlength="300" placeholder="10.xxxx/xxxxx"></label></div>
+    <label>Tags <input name="tags" placeholder="e.g. methods, theory, to-cite"><span class="help">Separate tags with commas.</span></label>
+    <label>Status<select name="status"><option value="to-read">To read</option><option value="reading">Reading</option><option value="read">Read</option><option value="reference">Reference</option></select></label>
+    <label>Abstract<textarea name="abstract" rows="3" maxlength="12000" placeholder="Optional abstract or summary"></textarea></label>
+    <label>Research notes<textarea name="notes" rows="3" maxlength="12000" placeholder="Your thoughts, questions and takeaways"></textarea></label>
+    <p id="paper-form-error" class="error" role="alert"></p>
+    <div class="dialog-actions"><button type="button" id="cancel-paper" class="button secondary">Cancel</button><button type="submit" class="button primary">Save paper</button></div>
+  </form>
+</dialog>
+
+<dialog id="detail-dialog" class="detail-dialog">
+  <div class="dialog-form">
+    <div class="dialog-head"><div><p class="eyebrow">PAPER WORKSPACE</p><h2 id="detail-title">Paper</h2><p id="detail-meta" class="subtle"></p></div><button type="button" id="close-detail" class="icon-button" aria-label="Close">×</button></div>
+    <div class="detail-actions"><button id="edit-current" class="button secondary">Edit metadata</button><label class="button secondary file-button">Upload / replace PDF<input id="pdf-upload" type="file" accept="application/pdf"></label><button id="open-pdf" class="button secondary">Open PDF</button></div>
+    <div class="workspace-grid">
+      <section class="workspace-panel"><h3>Paper notes</h3><p id="detail-abstract" class="subtle"></p><div id="detail-notes" class="notes-text"></div></section>
+      <section class="workspace-panel"><div class="section-head"><h3>Annotations</h3><button id="add-annotation" class="button small-button primary">＋ Add note</button></div><div id="annotation-list"></div></section>
+    </div>
+    <div class="dialog-actions"><button id="delete-current" class="button danger">Delete paper</button><span class="grow"></span><button id="done-detail" class="button secondary">Done</button></div>
+    <p id="detail-error" class="error" role="alert"></p>
+  </div>
+</dialog>
+
+<dialog id="annotation-dialog">
+  <form id="annotation-form" method="dialog" class="dialog-form">
+    <div class="dialog-head"><div><p class="eyebrow">READING NOTES</p><h2 id="annotation-dialog-title">Add annotation</h2></div><button type="button" id="close-annotation" class="icon-button" aria-label="Close">×</button></div>
+    <input type="hidden" name="id">
+    <label>Type<select name="type"><option value="comment">Comment</option><option value="highlight">Highlight</option><option value="sticky">Sticky note</option><option value="review">Review note</option></select></label>
+    <div class="two-col"><label>PDF page<input name="page" type="number" min="1" value="1" required></label><label>Highlight colour<select name="color"><option value="yellow">Yellow</option><option value="green">Green</option><option value="pink">Pink</option><option value="blue">Blue</option><option value="orange">Orange</option></select></label></div>
+    <label>Selected text (optional)<textarea name="text" rows="3" maxlength="12000" placeholder="Paste the passage you highlighted"></textarea></label>
+    <label>Comment / note<textarea name="note" rows="4" maxlength="12000" placeholder="What do you want to remember about this passage?"></textarea></label>
+    <p class="help">This stores the annotation and page reference in the cloud. It does not yet draw highlights directly on the PDF page.</p>
+    <p id="annotation-error" class="error" role="alert"></p>
+    <div class="dialog-actions"><button type="button" id="cancel-annotation" class="button secondary">Cancel</button><button type="submit" class="button primary">Save annotation</button></div>
+  </form>
+</dialog>
+<footer><span>Marginalia</span><span>Private by design · HTML + Node.js + MongoDB Atlas</span><a href="/original-marginalia.html" target="_blank" rel="noopener">Open original reader</a></footer>
+</body>
+</html>
